@@ -1,0 +1,3 @@
+pyuic5 ui/design/main.ui -o ui/components/main/main_form.py
+pyuic5 ui/design/class_dialog.ui -o ui/components/dialog/class_dialog_form.py
+
