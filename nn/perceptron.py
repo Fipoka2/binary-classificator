@@ -11,6 +11,9 @@ class Perceptron:
         self._input_size = n
         self._weights = (0.3 + 0.3) * np.random.random_sample((n + 1)) - 0.3
 
+    def set_random_weights(self):
+        self._weights = (0.3 + 0.3) * np.random.random_sample((self._input_size + 1)) - 0.3
+
     @staticmethod
     def _activation(value):
         return 1 if value >= 0 else 0
@@ -47,3 +50,10 @@ class Perceptron:
             current_epoch += 1
             if logger:
                 logger(current_epoch / epochs)
+
+    def train_on_sample(self, x: np.ndarray, y: int, learning_rate=0.0002):
+        x = np.append(x, 1)
+        output = self._forward(x)
+        error = y - output
+        if error != 0:
+            self._weights = self._weights + learning_rate * error * x

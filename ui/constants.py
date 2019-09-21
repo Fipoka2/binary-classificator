@@ -4,6 +4,7 @@ from PyQt5.QtCore import QSize
 WHITE_COLOR = QtGui.QColor(255, 255, 255)
 IMAGE_SIZE = QSize(500, 500)
 PREVIEW_SIZE = QSize(180, 180)
+MAXPOOL_SIZE = 125
 
 PEN_COLORS = {
     'BLACK': QtGui.QColor(0, 0, 0),

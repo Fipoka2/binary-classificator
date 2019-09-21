@@ -2,12 +2,12 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QDir
 from PyQt5.QtWidgets import QFileDialog
 
-from nn.data import ImageDataset, Sample
+from nn.data import ImageDataset, Sample, ImageDataGenerator
 from nn.perceptron import Perceptron
 from ui.components.dialog.class_dialog import ClassDialog
 from ui.components.main import main_form
-from ui.constants import PEN_TYPES, PEN_COLORS, IMAGE_SIZE, WHITE_COLOR, DIALOG_SIGNAL_CLASS_0, \
-    DIALOG_SIGNAL_CLASS_1
+from ui.constants import PEN_TYPES, PEN_COLORS, WHITE_COLOR, DIALOG_SIGNAL_CLASS_0, \
+    DIALOG_SIGNAL_CLASS_1, MAXPOOL_SIZE
 
 
 class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
@@ -19,7 +19,7 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
 
         self._dataset = ImageDataset()
         self._selectedPreviewIdx = None
-        self.nn = Perceptron(IMAGE_SIZE.height())
+        self.nn = Perceptron(MAXPOOL_SIZE ** 2)
 
         self.dialog = ClassDialog(self._dataset.get_classes())
         self._initModelTab()
@@ -52,10 +52,12 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         self.removeImageButton.clicked.connect(self._removeImage)
 
     def _initModelTab(self):
-        pass
+        self.dropWeightsButton.clicked.connect(lambda: self.nn.set_random_weights())
 
     def _initOther(self):
         self.addImageButton.clicked.connect(self._addToDataset)
+        self.trainButton.clicked.connect(self._trainOnImage)
+        self.checkImageButton.clicked.connect(self._predict)
         # edit = QLineEdit()
         # self.class0ValueLabel.setBuddy(edit)
 
@@ -64,6 +66,18 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
                                                   QDir.currentPath())
         if fileName:
             self.painter.openImage(fileName)
+
+    def _predict(self):
+        arr = ImageDataGenerator.prepareImage(self.painter.image)
+        print(self.nn.predict(arr))
+
+    def _trainOnImage(self):
+        cls = self._selectClass()
+        if cls is None:
+            return
+
+        arr = ImageDataGenerator.prepareImage(self.painter.image)
+        self.nn.train_on_sample(arr, cls)
 
     def _addToDataset(self):
         cls = self._selectClass()
@@ -82,13 +96,14 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         self.previewClassLabel.setText(self._dataset.classes[sample.cls])
 
     def _showNextImage(self):
-        if self._selectedPreviewIdx != len(self._dataset.samples) - 1:
+        if self._selectedPreviewIdx is not None \
+                and self._selectedPreviewIdx != len(self._dataset.samples) - 1:
             self._selectedPreviewIdx += 1
             self._setPreviewImage(self._dataset.samples[self._selectedPreviewIdx])
             self._updatePreviewLabel()
 
     def _showPreviousImage(self):
-        if self._selectedPreviewIdx != 0:
+        if self._selectedPreviewIdx is not None and self._selectedPreviewIdx != 0:
             self._selectedPreviewIdx -= 1
             self._setPreviewImage(self._dataset.samples[self._selectedPreviewIdx])
             self._updatePreviewLabel()

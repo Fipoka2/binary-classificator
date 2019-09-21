@@ -3,6 +3,8 @@ from typing import TypeVar, List
 import numpy as np
 from PyQt5.QtGui import QImage
 
+from ui.constants import MAXPOOL_SIZE
+
 
 class ImageDataGenerator:
     def __init__(self):
@@ -33,16 +35,16 @@ class ImageDataGenerator:
         return ImageDataGenerator._toGrayscale(arr)
 
     @staticmethod
-    def _maxpool(image: np.ndarray, output_size=125):
+    def _maxpool(image: np.ndarray, output_size=MAXPOOL_SIZE):
         input_size = image.shape[0]
         bin_size = input_size // output_size
-        return image.reshape((3, output_size, bin_size,
+        return image.reshape((1, output_size, bin_size,
                               output_size, bin_size)).max(4).max(2)
 
     @staticmethod
     def prepareImage(image: QImage):
         arr = ImageDataGenerator.convertImage(image)
-        return ImageDataGenerator._maxpool(arr)
+        return ImageDataGenerator._maxpool(arr).flatten()
 
 
 class Sample:
