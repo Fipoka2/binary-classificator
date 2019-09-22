@@ -1,3 +1,5 @@
+import pickle
+
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QDir
 from PyQt5.QtWidgets import QFileDialog
@@ -15,7 +17,7 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         super().__init__()
         self.setupUi(self)
         self._initDrawerSettings()
-        self.load_image_button.clicked.connect(self.open)
+        self.load_image_button.clicked.connect(self._openImageFile)
 
         self._dataset = ImageDataset()
         self._selectedPreviewIdx = None
@@ -46,13 +48,23 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         )
 
     def _initDatasetTab(self):
+        self.saveDatasetButton.setEnabled(False)  # TODO: self._saveDataset
+        self.loadDatasetButton.setEnabled(False)  # TODO: self._loadDataset
+
         self.nextImageButton.clicked.connect(self._showNextImage)
         self.previousImageButton.clicked.connect(self._showPreviousImage)
         self.editButton.clicked.connect(self._setPreviewImageOnPainter)
         self.removeImageButton.clicked.connect(self._removeImage)
+        self.clearDatasetButton.clicked.connect(self._clearDataset)
+        self.loadDatasetButton.clicked.connect(self._loadDataset)
+        self.saveDatasetButton.clicked.connect(self._saveDataset)
 
     def _initModelTab(self):
         self.dropWeightsButton.clicked.connect(lambda: self.nn.set_random_weights())
+        self.loadModelButton.clicked.connect(self._loadModel)
+        self.saveModelButton.clicked.connect(self._saveModel)
+        self.trainModelButton.clicked.connect(self._trainModel)
+        self._updateModelLabels()
 
     def _initOther(self):
         self.addImageButton.clicked.connect(self._addToDataset)
@@ -61,11 +73,42 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         # edit = QLineEdit()
         # self.class0ValueLabel.setBuddy(edit)
 
-    def open(self):
+    def _openImageFile(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File",
                                                   QDir.currentPath())
         if fileName:
             self.painter.openImage(fileName)
+
+    def _loadDataset(self):
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File",
+                                                  QDir.currentPath())
+        if fileName:
+            with open(fileName, 'rb') as dataset:
+                self._dataset: ImageDataset = pickle.load(dataset)
+                self._setPreviewImage(self._dataset.samples[0])
+
+    def _saveDataset(self):
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save File",
+                                                  QDir.currentPath())
+        with open(fileName, 'wb') as f:
+            pickle.dump(self._dataset, f)
+
+    def _loadModel(self):
+        fileName, _ = QFileDialog.getOpenFileName(self, "Загрузить модель",
+                                                  QDir.currentPath())
+        if fileName:
+            with open(fileName, 'rb') as model:
+                self.nn: Perceptron = pickle.load(model)
+            self._updateModelLabels()
+
+    def _saveModel(self):
+        fileName, _ = QFileDialog.getSaveFileName(self, "Сохранить модель",
+                                                  QDir.currentPath())
+        with open(fileName, 'wb') as f:
+            try:
+                pickle.dump(self.nn, f)
+            except FileNotFoundError:
+                pass
 
     def _predict(self):
         arr = ImageDataGenerator.prepareImage(self.painter.image)
@@ -89,6 +132,13 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         if self._selectedPreviewIdx is None:
             self._selectedPreviewIdx = 0
             self._setPreviewImage(self._dataset.samples[0])
+        self._updatePreviewLabel()
+
+    def _clearDataset(self):
+        self._dataset.samples.clear()
+        self._selectedPreviewIdx = None
+        self.previewBox.image.fill(WHITE_COLOR)
+        self.previewBox.update()
         self._updatePreviewLabel()
 
     def _setPreviewImage(self, sample: Sample):
@@ -118,8 +168,9 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
             self._dataset.classes[self._dataset.samples[idx].cls] if idx is not None else ' ')
 
     def _setPreviewImageOnPainter(self):
-        self.painter.image = self._dataset.samples[self._selectedPreviewIdx].image.copy()
-        self.painter.update()
+        if self._selectedPreviewIdx is not None:
+            self.painter.image = self._dataset.samples[self._selectedPreviewIdx].image.copy()
+            self.painter.update()
 
     def _removeImage(self):
         idx = self._selectedPreviewIdx
@@ -147,3 +198,11 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
             return 0
         if returnCode == DIALOG_SIGNAL_CLASS_1:
             return 1
+
+    def _updateModelLabels(self):
+        self.inputValueLabel.setText(str(self.nn.size()))
+
+    def _trainModel(self):
+        X, y = ImageDataGenerator.PrepareDataset(self._dataset.samples)
+        self.nn.train(X, y)
+        print("trained")

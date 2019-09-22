@@ -11,6 +11,9 @@ class Perceptron:
         self._input_size = n
         self._weights = (0.3 + 0.3) * np.random.random_sample((n + 1)) - 0.3
 
+    def size(self):
+        return self._input_size
+
     def set_random_weights(self):
         self._weights = (0.3 + 0.3) * np.random.random_sample((self._input_size + 1)) - 0.3
 
@@ -36,14 +39,14 @@ class Perceptron:
         temp[:, :-1] = X
         return temp
 
-    def train(self, X: np.ndarray, y: np.ndarray, learning_rate=0.2, epochs: int = 1, logger=None):
+    def train(self, X: np.ndarray, y: np.ndarray, learning_rate=0.02, epochs: int = 1, logger=None):
         X = self._add_bias(X)
         current_epoch = 0
         while current_epoch < epochs:
 
             for xi, yi in zip(X, y):
                 output = self._forward(xi)
-                error = output - yi
+                error = yi - output
                 if error != 0:
                     self._weights = self._weights + learning_rate * error * xi
 
@@ -51,7 +54,7 @@ class Perceptron:
             if logger:
                 logger(current_epoch / epochs)
 
-    def train_on_sample(self, x: np.ndarray, y: int, learning_rate=0.0002):
+    def train_on_sample(self, x: np.ndarray, y: int, learning_rate=0.02):
         x = np.append(x, 1)
         output = self._forward(x)
         error = y - output

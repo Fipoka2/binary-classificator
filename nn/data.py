@@ -6,6 +6,12 @@ from PyQt5.QtGui import QImage
 from ui.constants import MAXPOOL_SIZE
 
 
+class Sample:
+    def __init__(self, image, cls):
+        self.image = image
+        self.cls = cls
+
+
 class ImageDataGenerator:
     def __init__(self):
         pass
@@ -46,11 +52,20 @@ class ImageDataGenerator:
         arr = ImageDataGenerator.convertImage(image)
         return ImageDataGenerator._maxpool(arr).flatten()
 
+    @staticmethod
+    def prepareSample(sample: Sample):
+        return ImageDataGenerator.prepareImage(sample.image), sample.cls
 
-class Sample:
-    def __init__(self, image, cls):
-        self.image = image
-        self.cls = cls
+    @staticmethod
+    def PrepareDataset(samples: List[Sample]):
+        X = []
+        y = []
+        for s in samples:
+            xi, yi = ImageDataGenerator.prepareSample(s)
+            X.append(xi)
+            y.append(yi)
+
+        return np.array(X), np.array(y)
 
 
 class ImageDataset:
