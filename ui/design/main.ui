@@ -78,7 +78,7 @@ border : 1px solid black;</string>
     <rect>
      <x>540</x>
      <y>350</y>
-     <width>181</width>
+     <width>151</width>
      <height>121</height>
     </rect>
    </property>
@@ -90,7 +90,7 @@ border : 1px solid black;</string>
      <rect>
       <x>10</x>
       <y>70</y>
-      <width>151</width>
+      <width>131</width>
       <height>31</height>
      </rect>
     </property>
@@ -103,12 +103,12 @@ border : 1px solid black;</string>
      <rect>
       <x>10</x>
       <y>30</y>
-      <width>151</width>
+      <width>131</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Обучить на изображении</string>
+     <string>Обучить</string>
     </property>
    </widget>
   </widget>
@@ -219,7 +219,7 @@ border : 1px solid black;</string>
       <string>Скорость обучения:</string>
      </property>
     </widget>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox">
+    <widget class="QDoubleSpinBox" name="learningRateValue">
      <property name="geometry">
       <rect>
        <x>270</x>
@@ -254,7 +254,7 @@ border : 1px solid black;</string>
       <string>Эпохи:</string>
      </property>
     </widget>
-    <widget class="QSpinBox" name="spinBox">
+    <widget class="QSpinBox" name="epochsValue">
      <property name="geometry">
       <rect>
        <x>270</x>
@@ -379,76 +379,32 @@ border : 1px solid black;</string>
       </rect>
      </property>
      <property name="title">
-      <string>Классы</string>
+      <string>Имена классов</string>
      </property>
-     <widget class="QLabel" name="class0Label">
+     <widget class="QLineEdit" name="class0Input">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>30</y>
-        <width>47</width>
-        <height>13</height>
+        <y>20</y>
+        <width>101</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="text">
-       <string>Класс 0:</string>
+       <string>class_0</string>
       </property>
      </widget>
-     <widget class="QLabel" name="class1Label">
+     <widget class="QLineEdit" name="class1Input">
       <property name="geometry">
        <rect>
         <x>10</x>
         <y>60</y>
-        <width>47</width>
-        <height>13</height>
+        <width>101</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="text">
-       <string>Класс 1:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="class0ValueLabel">
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>30</y>
-        <width>47</width>
-        <height>13</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>0</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::PlainText</enum>
-      </property>
-      <property name="wordWrap">
-       <bool>true</bool>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::LinksAccessibleByMouse|Qt::TextEditable|Qt::TextEditorInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-      </property>
-     </widget>
-     <widget class="QLabel" name="class1ValueLabel">
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>60</y>
-        <width>47</width>
-        <height>13</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>1</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::PlainText</enum>
-      </property>
-      <property name="wordWrap">
-       <bool>true</bool>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::LinksAccessibleByMouse|Qt::TextEditable|Qt::TextEditorInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+       <string>class_1</string>
       </property>
      </widget>
     </widget>
@@ -551,7 +507,7 @@ border : 1px solid black;</string>
     <rect>
      <x>550</x>
      <y>500</y>
-     <width>151</width>
+     <width>131</width>
      <height>31</height>
     </rect>
    </property>
@@ -607,10 +563,10 @@ border : 1px solid black;</string>
      <number>1</number>
     </property>
     <property name="maximum">
-     <number>15</number>
+     <number>20</number>
     </property>
     <property name="value">
-     <number>2</number>
+     <number>7</number>
     </property>
    </widget>
   </widget>
@@ -627,6 +583,45 @@ border : 1px solid black;</string>
     <string>Очистить</string>
    </property>
   </widget>
+  <widget class="LogList" name="logList">
+   <property name="geometry">
+    <rect>
+     <x>700</x>
+     <y>350</y>
+     <width>191</width>
+     <height>121</height>
+    </rect>
+   </property>
+   <property name="horizontalScrollBarPolicy">
+    <enum>Qt::ScrollBarAlwaysOff</enum>
+   </property>
+   <property name="sizeAdjustPolicy">
+    <enum>QAbstractScrollArea::AdjustToContents</enum>
+   </property>
+   <property name="resizeMode">
+    <enum>QListView::Fixed</enum>
+   </property>
+  </widget>
+  <widget class="QLabel" name="predictedClass">
+   <property name="geometry">
+    <rect>
+     <x>700</x>
+     <y>505</y>
+     <width>151</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>
@@ -640,6 +635,11 @@ border : 1px solid black;</string>
    <extends>QFrame</extends>
    <header>ui.components.preview_box</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LogList</class>
+   <extends>QListWidget</extends>
+   <header>ui.components.log_list</header>
   </customwidget>
  </customwidgets>
  <resources/>

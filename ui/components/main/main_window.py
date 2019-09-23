@@ -9,7 +9,7 @@ from nn.perceptron import Perceptron
 from ui.components.dialog.class_dialog import ClassDialog
 from ui.components.main import main_form
 from ui.constants import PEN_TYPES, PEN_COLORS, WHITE_COLOR, DIALOG_SIGNAL_CLASS_0, \
-    DIALOG_SIGNAL_CLASS_1, MAXPOOL_SIZE
+    DIALOG_SIGNAL_CLASS_1, MAXPOOL_SIZE, MessageType
 
 
 class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
@@ -22,6 +22,10 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         self._dataset = ImageDataset()
         self._selectedPreviewIdx = None
         self.nn = Perceptron(MAXPOOL_SIZE ** 2)
+        self._modelSettings = {
+            'rate': 0.05,
+            'epochs': 5,
+        }
 
         self.dialog = ClassDialog(self._dataset.get_classes())
         self._initModelTab()
@@ -42,10 +46,7 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         self.spinSizeBox.valueChanged.connect(
             lambda idx: self.painter.changePenSize(self.spinSizeBox.value())
         )
-
-        self.clearCanvasButton.clicked.connect(
-            lambda: self.painter.clearCanvas()
-        )
+        self.clearCanvasButton.clicked.connect(self._clearCanvas)
 
     def _initDatasetTab(self):
         self.nextImageButton.clicked.connect(self._showNextImage)
@@ -61,20 +62,27 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         self.loadModelButton.clicked.connect(self._loadModel)
         self.saveModelButton.clicked.connect(self._saveModel)
         self.trainModelButton.clicked.connect(self._trainModel)
+        self.learningRateValue.valueChanged.connect(self._updateModelSettings)
+        self.epochsValue.valueChanged.connect(self._updateModelSettings)
         self._updateModelLabels()
 
     def _initOther(self):
         self.addImageButton.clicked.connect(self._addToDataset)
         self.trainButton.clicked.connect(self._trainOnImage)
         self.checkImageButton.clicked.connect(self._predict)
-        # edit = QLineEdit()
-        # self.class0ValueLabel.setBuddy(edit)
+        self.class0Input.editingFinished.connect(self._updateClassNames)
+        self.class1Input.editingFinished.connect(self._updateClassNames)
+
+    def _clearCanvas(self):
+        self.painter.clearCanvas()
+        self.predictedClass.clear()
 
     def _openImageFile(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File",
                                                   QDir.currentPath())
         if fileName:
             self.painter.openImage(fileName)
+            self.logList.addMessage("Изображение загружено", MessageType.INFO)
 
     def _loadDataset(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File",
@@ -85,12 +93,16 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
                 self._dataset = ImageDataset.fromDto(dto)
                 self._selectedPreviewIdx = 0
                 self._setPreviewImage(self._dataset.samples[self._selectedPreviewIdx])
+                self._setClassNames()
+                self.logList.addMessage("Датасет загружен", MessageType.INFO)
 
     def _saveDataset(self):
         fileName, _ = QFileDialog.getSaveFileName(self, "Save File",
                                                   QDir.currentPath())
-        with open(fileName, 'wb') as f:
-            pickle.dump(self._dataset.toDTO(), f)
+        if fileName:
+            with open(fileName, 'wb') as f:
+                pickle.dump(self._dataset.toDTO(), f)
+                self.logList.addMessage("Датасет сохранён", MessageType.INFO)
 
     def _loadModel(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Загрузить модель",
@@ -98,7 +110,7 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         if fileName:
             with open(fileName, 'rb') as model:
                 self.nn: Perceptron = pickle.load(model)
-            self._updateModelLabels()
+                self._updateModelLabels()
 
     def _saveModel(self):
         fileName, _ = QFileDialog.getSaveFileName(self, "Сохранить модель",
@@ -109,9 +121,15 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
             except FileNotFoundError:
                 pass
 
+    def _updateModelSettings(self):
+        self._modelSettings['rate'] = self.learningRateValue.value()
+        self._modelSettings['epochs'] = self.epochsValue.value()
+
     def _predict(self):
         arr = ImageDataGenerator.prepareImage(self.painter.image)
-        print(self.nn.predict(arr))
+        cls = self.nn.predict(arr)
+        print(cls)
+        self.predictedClass.setText("Это " + self._dataset.classes[cls])
 
     def _trainOnImage(self):
         cls = self._selectClass()
@@ -120,6 +138,8 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
 
         arr = ImageDataGenerator.prepareImage(self.painter.image)
         self.nn.train_on_sample(arr, cls)
+        self.logList.addMessage("Веса скорректированы", MessageType.INFO)
+        self.painter.clearCanvas()
 
     def _addToDataset(self):
         cls = self._selectClass()
@@ -132,6 +152,8 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
             self._selectedPreviewIdx = 0
             self._setPreviewImage(self._dataset.samples[0])
         self._updatePreviewLabel()
+        self.logList.addMessage("Изображение добавлено", MessageType.INFO)
+        self.painter.clearCanvas()
 
     def _clearDataset(self):
         self._dataset.samples.clear()
@@ -139,6 +161,7 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         self.previewBox.image.fill(WHITE_COLOR)
         self.previewBox.update()
         self._updatePreviewLabel()
+        self.logList.addMessage("Датасет очищен", MessageType.INFO)
 
     def _setPreviewImage(self, sample: Sample):
         self.previewBox.setImage(sample.image)
@@ -188,6 +211,7 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
             self._setPreviewImage(self._dataset.samples[idx])
 
         self._updatePreviewLabel()
+        self.logList.addMessage("Изображение удалено из набора", MessageType.INFO)
 
     def _selectClass(self):
         returnCode = self.dialog.exec_()
@@ -198,10 +222,31 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         if returnCode == DIALOG_SIGNAL_CLASS_1:
             return 1
 
+    def _updateClassNames(self):
+        a = self._dataset.classes[0] = self.class0Input.text()
+        b = self._dataset.classes[1] = self.class1Input.text()
+        self.class0Input.clearFocus()
+        self.class1Input.clearFocus()
+        self.dialog.changeClassNames((a, b))
+        self._updatePreviewLabel()
+
+    def _setClassNames(self):
+        self.class0Input.setText(self._dataset.classes[0])
+        self.class1Input.setText(self._dataset.classes[1])
+        self.dialog.changeClassNames((self._dataset.classes[0], self._dataset.classes[1]))
+        self._updatePreviewLabel()
+
     def _updateModelLabels(self):
         self.inputValueLabel.setText(str(self.nn.size()))
 
     def _trainModel(self):
+        if len(self._dataset.samples) == 0:
+            self.logList.addMessage("Ошибка: датасет пуст!", MessageType.ERROR)
+            return
+
+        rate, epochs = self._modelSettings['rate'], self._modelSettings['epochs']
+        self.logList.addMessage("Начало обучения...", MessageType.INFO)
+        self.logList.addMessage(f"Параметры: r={rate}, e={epochs}", MessageType.INFO)
         X, y = ImageDataGenerator.PrepareDataset(self._dataset.samples)
-        self.nn.train(X, y)
-        print("trained")
+        self.nn.train(X, y, learning_rate=rate, epochs=epochs)
+        self.logList.addMessage("Обучение завершено", MessageType.INFO)

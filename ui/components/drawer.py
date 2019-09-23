@@ -14,7 +14,7 @@ class Drawer(QWidget):
         self.spray = None
         self.setAttribute(QtCore.Qt.WA_StaticContents)
         self.scribbling = False
-        self.penWidth = 2
+        self.penWidth = 7
         self.penColor = QtCore.Qt.black
         self.image = QtGui.QImage(IMAGE_SIZE, QtGui.QImage.Format_RGB32)
         self.image.fill(WHITE_COLOR)

@@ -1,19 +1,21 @@
-from PyQt5 import QtGui
-from PyQt5.QtCore import QSize
+from enum import Enum
 
-WHITE_COLOR = QtGui.QColor(255, 255, 255)
+from PyQt5.QtCore import QSize
+from PyQt5.QtGui import QColor
+
+WHITE_COLOR = QColor(255, 255, 255)
 IMAGE_SIZE = QSize(500, 500)
 PREVIEW_SIZE = QSize(180, 180)
-MAXPOOL_SIZE = 125
+MAXPOOL_SIZE = 250
 
 PEN_COLORS = {
-    'BLACK': QtGui.QColor(0, 0, 0),
-    'RED': QtGui.QColor(255, 0, 0),
-    'BLUE': QtGui.QColor(0, 0, 255),
-    'GREEN': QtGui.QColor(0, 255, 0),
-    'YELLOW': QtGui.QColor(255, 255, 0),
-    'ORANGE': QtGui.QColor(250, 165, 10),
-    'WHITE': QtGui.QColor(255, 255, 255),
+    'BLACK': QColor(0, 0, 0),
+    'RED': QColor(255, 0, 0),
+    'BLUE': QColor(0, 0, 255),
+    'GREEN': QColor(0, 255, 0),
+    'YELLOW': QColor(255, 255, 0),
+    'ORANGE': QColor(250, 165, 10),
+    'WHITE': QColor(255, 255, 255),
 }
 
 
@@ -32,3 +34,20 @@ PEN_TYPES = {
 
 DIALOG_SIGNAL_CLASS_0 = 10
 DIALOG_SIGNAL_CLASS_1 = 11
+
+
+class PenColors(Enum):
+    BLACK = QColor(0, 0, 0)
+    RED = QColor(255, 0, 0)
+    BLUE = QColor(0, 0, 255)
+    GREEN = QColor(0, 255, 0)
+    YELLOW = QColor(255, 255, 0)
+    ORANGE = QColor(250, 165, 10)
+    WHITE = QColor(255, 255, 255)
+
+
+class MessageType(Enum):
+    INFO = PenColors.BLACK.value
+    WARNING = PenColors.ORANGE.value
+    ERROR = PenColors.RED.value
+    SUCCESS = PenColors.GREEN.value
