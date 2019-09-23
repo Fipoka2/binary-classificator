@@ -57,7 +57,7 @@ class ImageDataGenerator:
         return ImageDataGenerator.prepareImage(sample.image), sample.cls
 
     @staticmethod
-    def PrepareDataset(samples: List[Sample]):
+    def PrepareDataset(samples: List[Sample]) -> tuple:
         X = []
         y = []
         for s in samples:
@@ -66,6 +66,13 @@ class ImageDataGenerator:
             y.append(yi)
 
         return np.array(X), np.array(y)
+
+
+class ImageDatasetDTO:
+    def __init__(self, samples, name, classes):
+        self.name = name
+        self.classes = classes
+        self.samples = samples
 
 
 class ImageDataset:
@@ -85,5 +92,31 @@ class ImageDataset:
     def __len__(self):
         return len(self.samples)
 
-    def get_classes(self):
+    def get_classes(self) -> tuple:
         return self.classes[0], self.classes[1]
+
+    def toDTO(self) -> ImageDatasetDTO:
+        samples = []
+        for item in self.samples:
+            image = item.image.convertToFormat(QImage.Format_RGB32)
+            width = image.width()
+            height = image.height()
+
+            ptr = image.constBits()
+            ptr.setsize(height * width * 4)
+            arr = np.frombuffer(ptr, np.uint8).reshape((height, width, 4))
+            samples.append((arr, item.cls))
+        return ImageDatasetDTO(samples, self.name, self.classes)
+
+    @staticmethod
+    def fromDto(dto: ImageDatasetDTO):
+        dataset = ImageDataset()
+
+        dataset.name = dto.name
+        dataset.classes = dto.classes
+        for item in dto.samples:
+            image = QImage(item[0], item[0].shape[1], item[0].shape[1],
+                           QImage.Format_RGB32)
+            cls = item[1]
+            dataset.samples.append(Sample(image, cls))
+        return dataset

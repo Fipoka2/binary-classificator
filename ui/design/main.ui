@@ -60,7 +60,7 @@
 border : 1px solid black;</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="load_image_button">
+  <widget class="QPushButton" name="loadImageButton">
    <property name="geometry">
     <rect>
      <x>140</x>
@@ -70,7 +70,7 @@ border : 1px solid black;</string>
     </rect>
    </property>
    <property name="text">
-    <string>Load image...</string>
+    <string>Загрузить...</string>
    </property>
   </widget>
   <widget class="QGroupBox" name="ImageActionsGroupBox">
@@ -122,7 +122,7 @@ border : 1px solid black;</string>
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="nnSettingTab">
     <attribute name="title">
@@ -193,28 +193,6 @@ border : 1px solid black;</string>
       <string>Обучить модель</string>
      </property>
     </widget>
-    <widget class="QProgressBar" name="trainProgressbar">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>150</x>
-       <y>230</y>
-       <width>171</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="value">
-      <number>100</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="invertedAppearance">
-      <bool>false</bool>
-     </property>
-    </widget>
     <widget class="QPushButton" name="saveModelButton">
      <property name="geometry">
       <rect>
@@ -226,6 +204,73 @@ border : 1px solid black;</string>
      </property>
      <property name="text">
       <string>Сохранить модель</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="learningRateLabel">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>50</y>
+       <width>121</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Скорость обучения:</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="doubleSpinBox">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>50</y>
+       <width>62</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <double>0.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.050000000000000</double>
+     </property>
+     <property name="value">
+      <double>0.200000000000000</double>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>80</y>
+       <width>101</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Эпохи:</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="spinBox">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>80</y>
+       <width>42</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>100</number>
+     </property>
+     <property name="value">
+      <number>5</number>
      </property>
     </widget>
    </widget>
@@ -587,13 +632,13 @@ border : 1px solid black;</string>
   <customwidget>
    <class>Drawer</class>
    <extends>QWidget</extends>
-   <header>ui.drawer</header>
+   <header>ui.components.drawer</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PreviewBox</class>
    <extends>QFrame</extends>
-   <header>ui.preview_box</header>
+   <header>ui.components.preview_box</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

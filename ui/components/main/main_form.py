@@ -6,7 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -32,9 +32,9 @@ class Ui_Form(object):
         self.painter.setStyleSheet("background-color: rgb(255, 255, 255);\n"
 "border : 1px solid black;")
         self.painter.setObjectName("painter")
-        self.load_image_button = QtWidgets.QPushButton(Form)
-        self.load_image_button.setGeometry(QtCore.QRect(140, 550, 101, 31))
-        self.load_image_button.setObjectName("load_image_button")
+        self.loadImageButton = QtWidgets.QPushButton(Form)
+        self.loadImageButton.setGeometry(QtCore.QRect(140, 550, 101, 31))
+        self.loadImageButton.setObjectName("loadImageButton")
         self.ImageActionsGroupBox = QtWidgets.QGroupBox(Form)
         self.ImageActionsGroupBox.setGeometry(QtCore.QRect(540, 350, 181, 121))
         self.ImageActionsGroupBox.setObjectName("ImageActionsGroupBox")
@@ -65,16 +65,28 @@ class Ui_Form(object):
         self.trainModelButton = QtWidgets.QPushButton(self.nnSettingTab)
         self.trainModelButton.setGeometry(QtCore.QRect(10, 230, 131, 31))
         self.trainModelButton.setObjectName("trainModelButton")
-        self.trainProgressbar = QtWidgets.QProgressBar(self.nnSettingTab)
-        self.trainProgressbar.setEnabled(True)
-        self.trainProgressbar.setGeometry(QtCore.QRect(150, 230, 171, 31))
-        self.trainProgressbar.setProperty("value", 100)
-        self.trainProgressbar.setOrientation(QtCore.Qt.Horizontal)
-        self.trainProgressbar.setInvertedAppearance(False)
-        self.trainProgressbar.setObjectName("trainProgressbar")
         self.saveModelButton = QtWidgets.QPushButton(self.nnSettingTab)
         self.saveModelButton.setGeometry(QtCore.QRect(20, 120, 121, 31))
         self.saveModelButton.setObjectName("saveModelButton")
+        self.learningRateLabel = QtWidgets.QLabel(self.nnSettingTab)
+        self.learningRateLabel.setGeometry(QtCore.QRect(160, 50, 121, 20))
+        self.learningRateLabel.setObjectName("learningRateLabel")
+        self.doubleSpinBox = QtWidgets.QDoubleSpinBox(self.nnSettingTab)
+        self.doubleSpinBox.setGeometry(QtCore.QRect(270, 50, 62, 22))
+        self.doubleSpinBox.setMinimum(0.0)
+        self.doubleSpinBox.setMaximum(1.0)
+        self.doubleSpinBox.setSingleStep(0.05)
+        self.doubleSpinBox.setProperty("value", 0.2)
+        self.doubleSpinBox.setObjectName("doubleSpinBox")
+        self.label = QtWidgets.QLabel(self.nnSettingTab)
+        self.label.setGeometry(QtCore.QRect(160, 80, 101, 16))
+        self.label.setObjectName("label")
+        self.spinBox = QtWidgets.QSpinBox(self.nnSettingTab)
+        self.spinBox.setGeometry(QtCore.QRect(270, 80, 42, 22))
+        self.spinBox.setMinimum(1)
+        self.spinBox.setMaximum(100)
+        self.spinBox.setProperty("value", 5)
+        self.spinBox.setObjectName("spinBox")
         self.tabWidget.addTab(self.nnSettingTab, "")
         self.datasetSettingsTab = QtWidgets.QWidget()
         self.datasetSettingsTab.setObjectName("datasetSettingsTab")
@@ -174,13 +186,13 @@ class Ui_Form(object):
         self.clearCanvasButton.setObjectName("clearCanvasButton")
 
         self.retranslateUi(Form)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.load_image_button.setText(_translate("Form", "Load image..."))
+        self.loadImageButton.setText(_translate("Form", "Загрузить..."))
         self.ImageActionsGroupBox.setTitle(_translate("Form", "Действия с изображением"))
         self.addImageButton.setText(_translate("Form", "Добавить в набор"))
         self.trainButton.setText(_translate("Form", "Обучить на изображении"))
@@ -189,6 +201,8 @@ class Ui_Form(object):
         self.loadModelButton.setText(_translate("Form", "Загрузить модель..."))
         self.trainModelButton.setText(_translate("Form", "Обучить модель"))
         self.saveModelButton.setText(_translate("Form", "Сохранить модель"))
+        self.learningRateLabel.setText(_translate("Form", "Скорость обучения:"))
+        self.label.setText(_translate("Form", "Эпохи:"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.nnSettingTab), _translate("Form", "Модель"))
         self.imageNumberLabel.setText(_translate("Form", "Изображение -"))
         self.imageNumberValueLabel.setText(_translate("Form", "1"))

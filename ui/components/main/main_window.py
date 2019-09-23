@@ -4,7 +4,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QDir
 from PyQt5.QtWidgets import QFileDialog
 
-from nn.data import ImageDataset, Sample, ImageDataGenerator
+from nn.data import ImageDataset, Sample, ImageDataGenerator, ImageDatasetDTO
 from nn.perceptron import Perceptron
 from ui.components.dialog.class_dialog import ClassDialog
 from ui.components.main import main_form
@@ -17,7 +17,7 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         super().__init__()
         self.setupUi(self)
         self._initDrawerSettings()
-        self.load_image_button.clicked.connect(self._openImageFile)
+        self.loadImageButton.clicked.connect(self._openImageFile)
 
         self._dataset = ImageDataset()
         self._selectedPreviewIdx = None
@@ -48,9 +48,6 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         )
 
     def _initDatasetTab(self):
-        self.saveDatasetButton.setEnabled(False)  # TODO: self._saveDataset
-        self.loadDatasetButton.setEnabled(False)  # TODO: self._loadDataset
-
         self.nextImageButton.clicked.connect(self._showNextImage)
         self.previousImageButton.clicked.connect(self._showPreviousImage)
         self.editButton.clicked.connect(self._setPreviewImageOnPainter)
@@ -84,14 +81,16 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
                                                   QDir.currentPath())
         if fileName:
             with open(fileName, 'rb') as dataset:
-                self._dataset: ImageDataset = pickle.load(dataset)
-                self._setPreviewImage(self._dataset.samples[0])
+                dto: ImageDatasetDTO = pickle.load(dataset)
+                self._dataset = ImageDataset.fromDto(dto)
+                self._selectedPreviewIdx = 0
+                self._setPreviewImage(self._dataset.samples[self._selectedPreviewIdx])
 
     def _saveDataset(self):
         fileName, _ = QFileDialog.getSaveFileName(self, "Save File",
                                                   QDir.currentPath())
         with open(fileName, 'wb') as f:
-            pickle.dump(self._dataset, f)
+            pickle.dump(self._dataset.toDTO(), f)
 
     def _loadModel(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Загрузить модель",
