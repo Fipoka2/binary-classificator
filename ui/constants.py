@@ -50,4 +50,4 @@ class MessageType(Enum):
     INFO = PenColors.BLACK.value
     WARNING = PenColors.ORANGE.value
     ERROR = PenColors.RED.value
-    SUCCESS = PenColors.GREEN.value
+    SUCCESS = QColor(0, 128, 0)

@@ -23,7 +23,7 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         self._selectedPreviewIdx = None
         self.nn = Perceptron(MAXPOOL_SIZE ** 2)
         self._modelSettings = {
-            'rate': 0.05,
+            'rate': 0.20,
             'epochs': 5,
         }
 
@@ -58,7 +58,7 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         self.saveDatasetButton.clicked.connect(self._saveDataset)
 
     def _initModelTab(self):
-        self.dropWeightsButton.clicked.connect(lambda: self.nn.set_random_weights())
+        self.dropWeightsButton.clicked.connect(self._dropWeights)
         self.loadModelButton.clicked.connect(self._loadModel)
         self.saveModelButton.clicked.connect(self._saveModel)
         self.trainModelButton.clicked.connect(self._trainModel)
@@ -77,6 +77,10 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         self.painter.clearCanvas()
         self.predictedClass.clear()
 
+    def _dropWeights(self):
+        self.nn.set_random_weights()
+        self.logList.addMessage("Веса сброшены", MessageType.INFO)
+
     def _openImageFile(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File",
                                                   QDir.currentPath())
@@ -94,7 +98,7 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
                 self._selectedPreviewIdx = 0
                 self._setPreviewImage(self._dataset.samples[self._selectedPreviewIdx])
                 self._setClassNames()
-                self.logList.addMessage("Датасет загружен", MessageType.INFO)
+                self.logList.addMessage("Датасет загружен", MessageType.SUCCESS)
 
     def _saveDataset(self):
         fileName, _ = QFileDialog.getSaveFileName(self, "Save File",
@@ -102,7 +106,7 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         if fileName:
             with open(fileName, 'wb') as f:
                 pickle.dump(self._dataset.toDTO(), f)
-                self.logList.addMessage("Датасет сохранён", MessageType.INFO)
+                self.logList.addMessage("Датасет сохранён", MessageType.SUCCESS)
 
     def _loadModel(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Загрузить модель",
@@ -110,16 +114,19 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
         if fileName:
             with open(fileName, 'rb') as model:
                 self.nn: Perceptron = pickle.load(model)
+                self.logList.addMessage("Модель загружена", MessageType.SUCCESS)
                 self._updateModelLabels()
 
     def _saveModel(self):
         fileName, _ = QFileDialog.getSaveFileName(self, "Сохранить модель",
                                                   QDir.currentPath())
-        with open(fileName, 'wb') as f:
-            try:
-                pickle.dump(self.nn, f)
-            except FileNotFoundError:
-                pass
+        if fileName:
+            with open(fileName, 'wb') as f:
+                try:
+                    pickle.dump(self.nn, f)
+                    self.logList.addMessage("Модель сохранена", MessageType.SUCCESS)
+                except FileNotFoundError:
+                    pass
 
     def _updateModelSettings(self):
         self._modelSettings['rate'] = self.learningRateValue.value()
@@ -128,7 +135,6 @@ class MainWindow(QtWidgets.QMainWindow, main_form.Ui_Form):
     def _predict(self):
         arr = ImageDataGenerator.prepareImage(self.painter.image)
         cls = self.nn.predict(arr)
-        print(cls)
         self.predictedClass.setText("Это " + self._dataset.classes[cls])
 
     def _trainOnImage(self):
